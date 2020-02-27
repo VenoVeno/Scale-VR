@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/base/jquery-ui.min.css" />
+    <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-storage.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.js"></script>
+
+    <script type="text/javascript">
+
+        var config = {
+            apiKey: "AIzaSyBohfuG6o0vW_MgWvsoIHJapeaumf92bUc",
+            authDomain: "scale-vr-c15d4.firebaseapp.com",
+            databaseURL: "https://scale-vr-c15d4.firebaseio.com",
+            projectId: "scale-vr-c15d4",
+            storageBucket: "scale-vr-c15d4.appspot.com",
+            messagingSenderId: "425740384888",
+            appId: "1:425740384888:web:3dbef9564a9e9949394b8d",
+            measurementId: "G-EY5XD3B6SH"
+        };
+
+        firebase.initializeApp(config);
+
+        $(document).ready(function () {
+            $("#upload").submit(function (event) {
+                event.preventDefault();
+                console.log("Upload Started");
+
+                if (document.getElementById("file").files.length == 0)
+                    alert("Please Upload an image");
+                else {
+                    const ref = firebase.storage().ref();
+                    const file = document.querySelector('#file').files[0]
+                    const name = (+new Date()) + '-' + file.name;
+                    const metadata = {
+                        contentType: file.type,
+                        customMetadata: {
+                            'viewcount': '0',
+                            'upvote': '0',
+                            'downvote': '0'
+                        }
+                    };
+                    const task = ref.child(name).put(file, metadata);
+                    task
+                        .then(snapshot => snapshot.ref.getDownloadURL())
+                        .then((url) => {
+                            console.log(url);
+                            document.querySelector('#file').src = url;
+                        })
+                        .catch(console.error);
+                    console.log("Upload may be complete");
+                }
+            });
+        });
+
+        function logoutuser() {
+            if (firebase.auth().currentUser) {
+                firebase.auth().signOut();
+                alert("Logout Successfull");
+            }
+            else {
+                alert("Currently no user is avaiable");
+            }
+            window.location.href = "login.html";
+        }
+
+        function sendEmailVerification() {
+            // [START sendemailverification]
+            firebase.auth().currentUser.sendEmailVerification().then(function () {
+                // Email Verification sent!
+                // [START_EXCLUDE]
+                alert('Email Verification Sent!');
+                // [END_EXCLUDE]
+            });
+            // [END sendemailverification]
+        }
+
+        function sendPasswordReset() {
+            var email;
+
+            firebase.auth().onAuthStateChanged(function (user) {
+                if (user) {
+                    console.log(user.email);
+                    email = user.email;
+                    firebase.auth().sendPasswordResetEmail(email).then(function () {
+                        // Password Reset Email Sent!
+                        // [START_EXCLUDE]
+                        alert('Password Reset Email Sent!');
+                        // [END_EXCLUDE]
+                    }).catch(function (error) {
+                        // Handle Errors here.
+                        var errorCode = error.code;
+                        var errorMessage = error.message;
+                        // [START_EXCLUDE]
+                        if (errorCode == 'auth/invalid-email') {
+                            alert(errorMessage);
+                        } else if (errorCode == 'auth/user-not-found') {
+                            alert(errorMessage);
+                        }
+                        console.log(error);
+                        // [END_EXCLUDE]
+                    });
+                }
+            });
+        }
+
+        function initApp() {
+            // Listening for auth state changes.
+            // [START authstatelistener]
+            firebase.auth().onAuthStateChanged(function (user) {
+                // [START_EXCLUDE silent]
+                document.getElementById('quickstart-verify-email').disabled = true;
+                // [END_EXCLUDE]
+                if (user) {
+                    // User is signed in.
+                    var displayName = user.displayName;
+                    var email = user.email;
+                    var emailVerified = user.emailVerified;
+                    var photoURL = user.photoURL;
+                    var isAnonymous = user.isAnonymous;
+                    var uid = user.uid;
+                    var providerData = user.providerData;
+                    // [START_EXCLUDE]
+                    if (!emailVerified) {
+                        document.getElementById('quickstart-verify-email').disabled = false;
+                    }
+                    document.getElementById('quickstart-password-reset').disabled = false;
+                    // [END_EXCLUDE]
+                } else {
+                    // User is signed out.
+                    // [START_EXCLUDE]
+                    window.location.href = "login.html";
+                    // [END_EXCLUDE]
+                }
+                // [START_EXCLUDE silent]
+                // [END_EXCLUDE]
+            });
+            // [END authstatelistener]
+
+            document.getElementById('quickstart-verify-email').addEventListener('click', sendEmailVerification, false);
+            document.getElementById('quickstart-password-reset').addEventListener('click', sendPasswordReset, false);
+        }
+
+        function switchpage() {
+            window.location.href = "explore.html";
+        }
+
+        window.onload = function () {
+            initApp();
+        };
+
+
+    </script>
+</head>
+
+<body>
+    <section class="container-fluid">
+        <section class="row justify-content-center">
+            <section class="col-12 col-sm-6 col-md-3">
+                <nav class="navbar navbar-expand-lg navbar-light d-flex justify-content-end">
+                    
+                    <a class="navbar-brand" href="javascript:logoutuser()">
+                        <img src="Logout.svg" width="30" height="30" class="d-inline-block align-top rounded mx-auto d-block"><small> &nbsp Logout </small>
+                    </a>
+                
+                </nav>
+                <img src="Mine.svg" class="rounded mx-auto d-block"/>
+
+                <button disabled class="btn btn-success btn-block" data-toggle="tooltip" title="Send Email"
+                    data-placement="bottom" id="quickstart-verify-email" name="verify-email">Send Email
+                    Verification</button>
+                <button class="btn btn-success btn-block" data-toggle="tooltip" title="Send Password Email"
+                    data-placement="bottom" disabled id="quickstart-password-reset" name="verify-email">Send Password
+                    Reset Email</button>
+
+                <form id="upload" method="post">
+                    <input class="form-control" type="file" name="file" id="file" class="file" accept="image/*">
+                    <button class="btn btn-success btn-block" data-toggle="tooltip" title="Upload Photo"
+                    data-placement="bottom">Upload Photo</button>
+                </form>
+                <br />
+                <button class="btn btn-success btn-block" data-toggle="tooltip" title="Switch to Explore"
+                data-placement="bottom" onclick="switchpage()">Switch to Explore</button>
+            </section>
+        </section>
+    </section>
+</body>
+
+</html>

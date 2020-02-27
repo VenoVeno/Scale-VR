@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/base/jquery-ui.min.css" />
+    <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-storage.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/0.7.1/aframe.min.js"></script>
+    <script type="text/javascript">
+
+        var config = {
+            apiKey: "AIzaSyBohfuG6o0vW_MgWvsoIHJapeaumf92bUc",
+            authDomain: "scale-vr-c15d4.firebaseapp.com",
+            databaseURL: "https://scale-vr-c15d4.firebaseio.com",
+            projectId: "scale-vr-c15d4",
+            storageBucket: "scale-vr-c15d4.appspot.com",
+            messagingSenderId: "425740384888",
+            appId: "1:425740384888:web:3dbef9564a9e9949394b8d",
+            measurementId: "G-EY5XD3B6SH"
+        };
+
+        firebase.initializeApp(config);
+
+        var index = 0;
+        var storage = firebase.storage().ref();
+
+        function view1() {
+            storage.listAll().then(function (result) {
+                result.items.forEach(function (imageRef) {
+                    // And finally display them
+                    index++;
+                    console.log(index);
+                    displayImage(imageRef);
+                });
+            })
+        }
+        var dv, uv, cnt;
+
+        function displayImage(imageRef) {
+            imageRef.getDownloadURL().then(function (url) {
+                imageRef.getMetadata().then(function (metadata) {
+                    console.log(metadata.contentType);
+
+                    dv = metadata.customMetadata.downvote;
+                    uv = metadata.customMetadata.upvote;
+                    cnt = metadata.customMetadata.viewcount;
+
+                    console.log("Downvote", metadata.customMetadata.downvote);
+                    console.log("Upvote", metadata.customMetadata.upvote);
+                    console.log("ViewCount", metadata.customMetadata.viewcount);
+                    //"'+ url + '" 
+                    let render = '';
+                    render += '<tr><td>';
+                    render += '<img src = "Mine.jpg" onclick="ar(this)" width="100px" style="float: right">';
+                    render += '</td><td>';
+                    render += cnt;
+                    render += ' views </td><td>';
+                    render += uv;
+                    render += ' upvote </td><td>';
+                    render += dv;
+                    render += ' downvote </td><td>';
+                    render += '<button class="btn btn-success btn-block" data-toggle="tooltip" title="Upvote" data-placement="bottom" id="call-me-upvote">Upvote</button>';
+                    render += '</td><td>';
+                    render += '<button class="btn btn-danger btn-block" data-toggle="tooltip" title="Downvote" data-placement="bottom" id="call-me-downvote">Downvote</button>';
+                    render += '</tr >';
+                    $('#List').find('tbody').append(render);
+
+                    document.getElementById("call-me-upvote").addEventListener('click',
+                        function upvote() {
+                            console.log("Upvote Called");
+                            //console.log(img);
+                            imageRef.getMetadata().then(function (metadata) {
+
+                                dv = metadata.customMetadata.downvote;
+                                uv = metadata.customMetadata.upvote;
+                                cnt = metadata.customMetadata.viewcount;
+
+                                console.log("init Downvote", metadata.customMetadata.downvote);
+                                console.log("init Upvote", metadata.customMetadata.upvote);
+                                console.log("init ViewCount", metadata.customMetadata.viewcount);
+                            })
+                            var uv = parseInt(metadata.customMetadata.upvote);
+                            uv += 1;
+                            var newMetadata = {
+                                customMetadata: {
+                                    'upvote': uv
+                                }
+                            }
+                            // Update metadata properties
+                            imageRef.updateMetadata(newMetadata).then(function (metadata) {
+                                console.log("Updated Upvote", metadata.customMetadata.upvote);
+                                window.location.href = "explore.html";
+                            }).catch(function (error) {
+                                console.log(error);
+                            });
+
+                        });
+                    document.getElementById('call-me-downvote').addEventListener('click',
+                        function downvote() {
+                            console.log("Downvote Called");
+                            imageRef.getMetadata().then(function (metadata) {
+
+                                dv = metadata.customMetadata.downvote;
+                                uv = metadata.customMetadata.upvote;
+                                cnt = metadata.customMetadata.viewcount;
+
+                                console.log("Downvote", metadata.customMetadata.downvote);
+                                console.log("Upvote", metadata.customMetadata.upvote);
+                                console.log("ViewCount", metadata.customMetadata.viewcount);
+                            })
+                            var dv = parseInt(metadata.customMetadata.downvote);
+                            dv += 1;
+                            var newMetadata = {
+                                customMetadata: {
+                                    'downvote': dv
+                                }
+                            }
+                            imageRef.updateMetadata(newMetadata).then(function (metadata) {
+                                console.log("Updated Downvote", metadata.customMetadata.downvote);
+                                window.location.href = "explore.html";
+                            }).catch(function (error) {
+                                console.log(error);
+                            });
+                        });
+                })
+            })
+        }
+
+        function logoutuser() {
+            if (firebase.auth().currentUser) {
+                firebase.auth().signOut();
+                alert("Logout Successfull");
+            }
+            else {
+                alert("Currently no user is avaiable");
+            }
+            window.location.href = "login.html";
+        }
+
+        function ar(img) {
+            console.log("Called");
+            let new_html = '';
+            console.log(img.src);
+            new_html += '<a-scene><a-sky src="' + img.src + '"></a-sky></a-scene>';
+            $('#panaroma').append(new_html);
+        }
+        function initApp() {
+            firebase.auth().onAuthStateChanged(function (user) {
+                if (!user)
+                    window.location.href = "login.html";
+            });
+
+            document.getElementById('quickstart-logout').addEventListener('click', logoutuser, false);
+        }
+
+        window.onload = function () {
+            initApp();
+            view1();
+        }
+
+        function switchpage() {
+            window.location.href = "dashboard.html";
+        }
+    </script>
+</head>
+
+<body>
+    <section class="container-fluid">
+        <section class="row justify-content-center">
+            <section class="col-12 col-sm-6 col-md-3">
+                <img src="Mine.svg" class="rounded mx-auto d-block" />
+
+                <table id="List" class="table table-bordered">
+                    <tbody>
+
+                    </tbody>
+                </table>
+
+                <div id="panaroma">
+
+                </div>
+
+                <button class="btn btn-success btn-block" data-toggle="tooltip" title="Switch to dashboard"
+                    data-placement="bottom" onclick="switchpage()">Switch to dashboard</button>
+                <button class="btn btn-success btn-block" data-toggle="tooltip" title="Logout User"
+                    data-placement="bottom" id="quickstart-logout" name="logout">Logout</button>
+            </section>
+        </section>
+    </section>
+
+</body>
+
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/base/jquery-ui.min.css" />
+    <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-auth.js"></script>
+
+    <script type="text/javascript">
+
+        var config = {
+            apiKey: "AIzaSyBohfuG6o0vW_MgWvsoIHJapeaumf92bUc",
+            authDomain: "scale-vr-c15d4.firebaseapp.com",
+            databaseURL: "https://scale-vr-c15d4.firebaseio.com",
+            projectId: "scale-vr-c15d4",
+            storageBucket: "scale-vr-c15d4.appspot.com",
+            messagingSenderId: "425740384888",
+            appId: "1:425740384888:web:3dbef9564a9e9949394b8d",
+            measurementId: "G-EY5XD3B6SH"
+        };
+
+        firebase.initializeApp(config);
+
+        function handleSignUp() {
+            var email = document.getElementById('email').value;
+            var password = document.getElementById('password').value;
+            if (email.length < 4) {
+                alert('Please enter an email address.');
+                return;
+            }
+            if (password.length < 4) {
+                alert('Please enter a password.');
+                return;
+            }
+            // Create user with email and pass.
+            // [START createwithemail]
+            firebase.auth().createUserWithEmailAndPassword(email, password).catch(function (error) {
+                // Handle Errors here.
+                var errorCode = error.code;
+                var errorMessage = error.message;
+                // [START_EXCLUDE]
+                if (errorCode == 'auth/weak-password') {
+                    alert('The password is too weak.');
+                } else {
+                    alert(errorMessage);
+                }
+                console.log(error);
+                // [END_EXCLUDE]
+            });
+            // [END createwithemail]
+        }
+
+        function initApp() {
+            firebase.auth().onAuthStateChanged(function (user) {
+                if (user) {
+                    window.location.href = "dashboard.html";
+                }
+            });
+
+            document.getElementById('quickstart-sign-up').addEventListener('click', handleSignUp, false);
+        }
+
+        window.onload = function () {
+            initApp();
+        };
+    </script>
+</head>
+
+<body>
+    <section class="container-fluid">
+        <section class="row justify-content-center">
+            <section class="col-12 col-sm-6 col-md-3">
+                <nav class="navbar navbar-expand-lg navbar-light d-flex justify-content-end">       
+    
+                    <a class="navbar-brand" href="login.html">
+                        <img src="Login.svg" width="30" height="30" class="d-inline-block align-top rounded mx-auto d-block"><small>  &nbsp   Login </small>
+                    </a>
+            
+                    <a class="navbar-brand" href="#">
+                        <img src="Signup.svg" width="30" height="30" class="d-inline-block align-top rounded mx-auto d-block"><small> &nbsp  Sign Up </small>
+                    </a>
+                
+                </nav>
+        
+                <img src="Mine.svg" class="rounded mx-auto d-block"/>
+
+                <div class="form-group">
+
+                    <input class="form-control"type="email" id="email" name="email" placeholder="Enter Email">
+                </div>
+
+                <div class="form-group">
+
+                    <input  class="form-control" type="password" id="password" name="password" placeholder="Enter Password">
+                </div>
+
+                <div class="form-group">
+
+                    <button class="btn btn-success btn-block" data-toggle="tooltip" title="Sign Up to Proceeed"
+                        data-placement="bottom" id="quickstart-sign-up" name="signup">Sign Up</button>
+                </div>
+
+            </section>
+        </section>
+    </section>
+
+</body>
+
+</html>
